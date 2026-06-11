@@ -14,7 +14,7 @@ import {
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-
+  const [showMenu , setShowMenu] = useState(false);
   // Premium Menu Names
   const navLinks = [
     { name: "Discover", href: "/" },
@@ -87,12 +87,25 @@ export default function Navbar() {
                 </span>
               </Link>
 
-              <Link
-                href="/profile"
-                className="p-2.5 rounded-full bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all"
+              <div
+              onClick={()=>setShowMenu(!showMenu)}
+                className="relative  p-2.5 rounded-full bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all cursor-pointer"
               >
-                <User className="w-5 h-5" />
-              </Link>
+                {
+                  showMenu ? <X /> : <User className="w-5 h-5" />
+                }
+
+                {
+                  showMenu && (
+                    <ul className="absolute top-full right-0 mt-2 w-32 bg-white shadow-lg rounded-lg p-2 z-50">
+                  <li className="p-2 hover:bg-slate-100 rounded">Profile</li>
+                  <li className="p-2 hover:bg-slate-100 rounded">Orders</li>
+                  <li className="p-2 hover:bg-slate-100 rounded">Logout</li>
+                  <li className="p-2 hover:bg-slate-100 rounded"><Link href= "/dashboard">Dashboard</Link></li>
+                </ul>
+                  )
+                }
+              </div>
             </div>
 
             {/* Mobile Actions */}
@@ -162,25 +175,31 @@ export default function Navbar() {
             </div>
 
             {/* Mobile Icons */}
-            <div className="pt-4 border-t border-slate-100 flex justify-around">
-              <Link
-                href="/wishlist"
-                onClick={() => setIsOpen(false)}
-                className="flex flex-col items-center text-xs gap-1"
+            <div className="pt-4 border-t border-slate-100 flex ">
+              
+              <div
+              onClick={()=>setShowMenu(!showMenu)}
+                className="relative  p-2.5 rounded-full bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all cursor-pointer"
               >
-                <Heart className="w-5 h-5" />
-                Wishlist
-              </Link>
+                {
+                  showMenu ? <X /> : <User className="w-5 h-5" />
+                }
 
-              <Link
-                href="/profile"
-                onClick={() => setIsOpen(false)}
-                className="flex flex-col items-center text-xs gap-1"
-              >
-                <User className="w-5 h-5" />
-                Account
-              </Link>
-            </div>
+                {
+                  showMenu && (
+                    <ul className="absolute top-full left-0 mt-2 w-32 bg-white shadow-lg rounded-lg p-2 z-50">
+                  <li className="p-2 hover:bg-slate-100 rounded">Profile</li>
+                  <li className="p-2 hover:bg-slate-100 rounded">Orders</li>
+                  <li className="p-2 hover:bg-slate-100 rounded">Logout</li>
+                  <li className="p-2 hover:bg-slate-100 rounded"><Link href= "/dashboard">Dashboard</Link></li>
+                </ul>
+                  )
+                }
+              </div>
+
+
+
+            </div>            
           </div>
         </div>
 
