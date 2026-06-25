@@ -11,28 +11,28 @@ export function FeaturedProducts() {
       title: "Oversized Street Hoodie",
       price: "$49",
       image:
-        "https://images.unsplash.com/photo-1520975916090-3105956dac38",
+        "https://images.unsplash.com/photo-1578768079052-aa76e52ff62e?fm=jpg",
     },
     {
       id: 2,
       title: "Minimalist White Tee",
       price: "$29",
       image:
-        "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab",
+        "https://images.unsplash.com/photo-1574180566232-aaad1b5b8450?fm=jpg",
     },
     {
       id: 3,
       title: "Relaxed Fit Jacket",
       price: "$89",
       image:
-        "https://images.unsplash.com/photo-1520975958225-7c8b1f2f2c6f",
+        "https://images.unsplash.com/photo-1555583743-991174c11425?fm=jpg",
     },
     {
       id: 4,
       title: "Urban Cargo Pants",
       price: "$59",
       image:
-        "https://images.unsplash.com/photo-1542272604-787c3835535d",
+        "https://images.unsplash.com/photo-1649850874075-49e014357b9d?fm=jpg",
     },
   ];
 

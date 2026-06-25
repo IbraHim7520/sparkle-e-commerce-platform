@@ -13,13 +13,15 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { useAuth } from "@/utils/useGetUser";
+import { authClient } from "@/lib/auth-client";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function Navbar() {
 
 
 
 
-  const { user, loading } = useAuth()
+  const { user, loading , setUser } = useAuth()
   console.log(user)
   const [isOpen, setIsOpen] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -38,9 +40,24 @@ const Categories = [
   { name: "Shoes", href: "/categories/shoes" },
 ];
 
-  if (loading) {
-    return null
+  // if (loading) {
+  //   return (
+  //     <div>
+
+  //     </div>
+  //   )
+  // }
+
+const handleUserLogout = async () => {
+  try {
+    await authClient.signOut();
+    toast.success("Logout successful");
+    setUser(null);
+  } catch (error) {
+    toast.error("Logout failed")
+    console.log("Logout failed:", error);
   }
+};
 
   return (
     <>
@@ -48,6 +65,8 @@ const Categories = [
       <div className="bg-slate-900 text-white text-center py-2 text-[11px] tracking-[0.25em] uppercase">
         Free Shipping on Orders Over $75
       </div>
+
+      <Toaster />
 
       <nav className="bg-white text-slate-800 border-b border-slate-100 sticky top-0 z-50 shadow-sm">
         <div className="max-w-[1600px] mx-auto px-2 sm:px-3 lg:px-4">
@@ -148,13 +167,11 @@ const Categories = [
                   {showMenu && (
                     <ul className="absolute top-full right-0 mt-2 w-40 bg-white shadow-lg rounded-lg p-2 z-50">
 
-                      <li className="p-2 hover:bg-slate-100 rounded cursor-pointer">
+                      <Link href={"/profile"} className="p-2 w-full hover:bg-slate-100 rounded cursor-pointer">
                         Profile
-                      </li>
+                      </Link>
 
-                      <li className="p-2 hover:bg-slate-100 rounded cursor-pointer">
-                        Orders
-                      </li>
+  
 
                       {/* ADMIN ONLY */}
                       {user.role === "ADMIN" && (
@@ -163,7 +180,7 @@ const Categories = [
                         </li>
                       )}
 
-                      <li className="p-2 hover:bg-slate-100 rounded cursor-pointer text-red-500">
+                      <li onClick={handleUserLogout} className="p-2 hover:bg-slate-100 rounded cursor-pointer text-red-500">
                         Logout
                       </li>
                     </ul>
@@ -262,17 +279,14 @@ const Categories = [
                   {showMenu && (
                     <ul className="absolute left-0 mt-2 w-40 bg-white shadow-lg rounded-lg p-2 z-50">
 
-                      <li className="p-2 hover:bg-slate-100 rounded">Profile</li>
-
-                      <li className="p-2 hover:bg-slate-100 rounded">Orders</li>
-
+                      <Link href={"/profile"} className="p-2 hover:bg-slate-100 rounded">Profile</Link>
                       {user.role === "ADMIN" && (
                         <li className="p-2 hover:bg-slate-100 rounded">
                           <Link href="/dashboard">Dashboard</Link>
                         </li>
                       )}
 
-                      <li className="p-2 hover:bg-slate-100 rounded text-red-500">
+                      <li onClick={handleUserLogout} className="p-2 hover:bg-slate-100 rounded text-red-500">
                         Logout
                       </li>
                     </ul>

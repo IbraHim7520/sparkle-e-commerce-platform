@@ -8,6 +8,9 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
+import signup_image from "@/assets/signup.jpg"
+import Image from "next/image";
+
 export default function RegisterPage() {
     const router = useRouter();
     const [errorMessage, setError] = useState("");
@@ -54,11 +57,15 @@ export default function RegisterPage() {
             <div className="w-full max-w-5xl bg-white shadow-xl rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
 
                 {/* Left Side Image */}
-                <div className="hidden md:flex items-center justify-center bg-indigo-500 p-8">
-                    <img
-                        src="https://illustrations.popsy.co/white/online-shopping.svg"
+                <div className="hidden md:flex items-center justify-center  p-2">
+                    <Image
+                        src={signup_image}
+                        quality={100}
+                        priority
+                        width={500}
+                        height={500}
                         alt="Register Illustration"
-                        className="w-full max-w-sm"
+                        className="w-full h-full object-cover rounded-tl-xl rounded-bl-xl max-w-full"
                     />
                 </div>
 

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Sparkles } from "lucide-react";
+import banner1 from  "@/assets/hero_banner1.jpg"
+import banner2 from  "@/assets/hero_banner2.jpg"
 
 export default function FreshModernHero() {
   return (
@@ -80,7 +82,7 @@ export default function FreshModernHero() {
               {/* Product Image Wrapper */}
               <div className="relative w-full h-[70%] rounded-xl overflow-hidden bg-slate-200">
                 <Image 
-                  src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=500&q=80" 
+                  src={banner1} 
                   alt="Classic Oversized Yellow Hoodie"
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -107,7 +109,7 @@ export default function FreshModernHero() {
               <div className="relative w-full h-[70%] p-3">
                 <div className="relative w-full h-full rounded-xl overflow-hidden bg-slate-200">
                   <Image 
-                    src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=500&q=80" 
+                    src={banner2}
                     alt="Premium Minimalist Outfit Showcase"
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"

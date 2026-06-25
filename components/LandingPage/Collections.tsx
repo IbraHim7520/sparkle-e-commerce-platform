@@ -1,13 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
+
+import newInImage from "@/assets/new_in.jpg"
+import cardigansImage from "@/assets/cardigans.jpg"
+import accesoriesImage from "@/assets/accessories.jpg"
+import shoesImage from "@/assets/shoes.jpg"
+import manFashion from "@/assets/fashion.jpg"
+
 
 interface CollectionItem {
   id: string;
   badge?: string;
   title: string;
-  image: string;
+  image: StaticImageData;
   href: string;
   isLarge?: boolean;
 }
@@ -19,7 +26,7 @@ export default function Collections() {
       badge: "20% OFF",
       title: "Best Seller",
       image:
-        "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=600&q=80",
+        manFashion,
       href: "/collections/best-seller",
       isLarge: true,
     },
@@ -27,28 +34,28 @@ export default function Collections() {
       id: "new-in",
       title: "New In",
       image:
-        "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80",
+        newInImage,
       href: "/collections/new-in",
     },
     {
       id: "shoes",
       title: "Shoes",
       image:
-        "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=600&q=80",
+        shoesImage,
       href: "/collections/shoes",
     },
     {
       id: "cardigans",
       title: "Cardigans",
       image:
-        "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=600&q=80",
+        cardigansImage,
       href: "/collections/cardigans",
     },
     {
       id: "accessories",
       title: "Accessories",
       image:
-        "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80",
+        accesoriesImage,
       href: "/collections/accessories",
     },
   ];
