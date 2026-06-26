@@ -46,7 +46,7 @@ export default function ProductUploadForm() {
       }
   },[])
 
-  const onSubmit: SubmitHandler<IUploadProductData> = async(data) => {
+  const onSubmit: SubmitHandler<IUploadProductData> = async(data:any) => {
     setLoading(true);
     if(!data?.tags.includes(",") && data?.tags.includes(" ")){
       toast.error("Tags must be separated by commas");
@@ -68,15 +68,17 @@ export default function ProductUploadForm() {
   )
 
   payload.images = imageUrls
-  console.log(payload)
+  
   const productUploadResponse = await axios.post(`${envFile.BACKEND_URL}/products/add-products`, payload)
-  console.log(productUploadResponse)
+  
   if(productUploadResponse.data.data.acknowledged){
     toast.success("Product added successfully")
     reset()
+    setLoading(false)
   }
   else{
     toast.error("Failed to add product")
+    setLoading(false)
   }
   setLoading(false)
 }
@@ -355,10 +357,10 @@ export default function ProductUploadForm() {
                 {
                   Array.from({ length: addCount }).map((_, i) => {
                     return (
-                      <div>
+                      <div key={i}>
 
 
-                        <div key={i} className="relative w-32 h-32 sm:w-40 sm:h-40 aspect-square border-2 border-dashed border-indigo-200 bg-indigo-50/30 hover:bg-indigo-50/60 hover:border-indigo-400 rounded-xl p-3 transition flex flex-col items-center text-center justify-center cursor-pointer group">
+                        <div className="relative w-32 h-32 sm:w-40 sm:h-40 aspect-square border-2 border-dashed border-indigo-200 bg-indigo-50/30 hover:bg-indigo-50/60 hover:border-indigo-400 rounded-xl p-3 transition flex flex-col items-center text-center justify-center cursor-pointer group">
 
                           {/* 1. Hidden file Input element */}
                           <input
@@ -451,7 +453,7 @@ export default function ProductUploadForm() {
               type="submit"
               className="w-full sm:w-auto order-1 sm:order-2 px-8 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 active:bg-indigo-800 shadow-lg shadow-indigo-600/20 transition duration-150 text-center"
             >
-              {loading ? "Uploading" : "Upload Product"}
+              {loading ? <span className="loading loading-spinner"></span> : "Upload Product"}
             </button>
           </div>
         </form>

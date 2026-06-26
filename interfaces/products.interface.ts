@@ -1,6 +1,7 @@
-enum ProductStatus {
+export enum ProductStatus {
     IN_STOCK = "IN_STOCK",
     UPCOMING = "UPCOMING",
+    OUT_OF_STOCK = "OUT_OF_STOCK",
 }
 export interface IUploadProductData {
     productName:string,
@@ -31,3 +32,23 @@ export interface IUploadProductData {
 //     productDescription: z.string().min(1 , "Product description is required"),
 //     productAdditionalInfo: z.string().optional(),
 //     tags: z.array(z.string()).optional(),  
+
+
+export interface IGetAllProductsData {
+    _id:string
+    productName: string;
+    productPrice: number;
+    productCategoryId: string;
+    productCategoryName: string;
+    stock: number;
+    discount?: number;
+    productStatus: ProductStatus;
+    images: string[];
+    productSize: string;
+    productColor: string;
+    productDescription: string;
+    productAdditionalInfo?: string;
+    tags?: string[];
+    createdAt?: string;
+    updatedAt?: string;
+}
