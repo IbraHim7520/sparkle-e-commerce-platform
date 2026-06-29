@@ -1,3 +1,4 @@
+
 import Collections from "@/components/LandingPage/Collections";
 import Faq from "@/components/LandingPage/faq";
 import { FeaturedProducts } from "@/components/LandingPage/FeaturedProduct";

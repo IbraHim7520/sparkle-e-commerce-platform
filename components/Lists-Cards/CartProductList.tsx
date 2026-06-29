@@ -27,7 +27,10 @@ export default function CartItemsList({ initialItems }: { initialItems: ICartIte
   return (
     <div className="space-y-3">
       {cartItems.map(item => 
-        <CartList key={item._id} item={item}/>
+        <CartList key={item._id} item={item}
+         setCartItems={setCartItems}
+         cartItems={cartItems}
+         />
       )}
     </div>
   );

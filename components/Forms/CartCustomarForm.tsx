@@ -4,18 +4,19 @@ import { useState } from "react";
 import { User, Phone, MapPin, FileText, ShoppingBag } from "lucide-react";
 import axios from "axios";
 import { envFile } from "@/config/env";
-import { ICartItem, IOrderCustomarInfo } from "@/interfaces/cart.interface";
+import { ICartItem, IOrderCustomarInfo, IOrderData } from "@/interfaces/cart.interface";
 import { useForm } from "react-hook-form";
+import toast, { Toaster } from "react-hot-toast";
 
 interface ICheckoutFormProps {
   cartItems: ICartItem[];
 }
 
 export default function CheckoutForm({ cartItems }: ICheckoutFormProps) {
+
   const {register , handleSubmit , reset} = useForm<IOrderCustomarInfo>()
   const [submitting, setSubmitting] = useState(false);
 
- 
   const totalProductPrice = cartItems.map(item=>{
     const price = item.quantity * Number(item.productPrice);
     return price
@@ -26,7 +27,37 @@ export default function CheckoutForm({ cartItems }: ICheckoutFormProps) {
    const grandTotal = subtotal + shipping;
  
   const onSubmit = async (data:IOrderCustomarInfo) => {
-    console.log(cartItems)
+    
+    const cartIds = cartItems.map(item=>{
+      return item._id
+    })
+    const produtcIds = cartItems.map(item=>{
+      return item.productId
+    })
+
+    const orderData: IOrderData = {
+      customarName: data.customarName,
+      customarPhone: data.customarPhone, 
+      customarAddress: data.customarAddress,
+      customarAdditionalNotes: data.customarAdditionalNotes,
+      cartIds: cartIds,
+      produtcIds: produtcIds
+    }
+
+    try {
+      const orderResponse = await axios.post(`${envFile.BACKEND_URL}/orders/create-order`, orderData, {
+        withCredentials:true
+      });
+      if(orderResponse.data.data){
+        toast.success("Order placed successfully")
+        reset()
+        window.location.reload();
+      }
+    } catch (error:any) {
+      console.log(error.response.data.message)
+      toast.error("Failed to place order")
+    }
+
   };
 
   return (
@@ -35,7 +66,7 @@ export default function CheckoutForm({ cartItems }: ICheckoutFormProps) {
         <h2 className="text-base font-bold text-slate-900 tracking-tight">Checkout Details</h2>
         <p className="text-xs text-slate-400">Provide shipping coordinates to complete invoice</p>
       </div>
-
+      <Toaster />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         
         {/* কাস্টমার নেম */}

@@ -1,3 +1,4 @@
+"use client"
 import { IGetAllProductsData } from "@/interfaces/products.interface";
 import { ShoppingBag } from "lucide-react";
 import Image from "next/image"

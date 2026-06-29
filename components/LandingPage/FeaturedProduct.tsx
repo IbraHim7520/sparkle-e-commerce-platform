@@ -47,8 +47,8 @@ export function FeaturedProducts() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-          {products.map((p) => (
-              <ProductCard p={p}/>
+          {products.map((p , idx) => (
+              <ProductCard p={p} key={idx}/>
           ))}
         </div>
       </div>

@@ -25,6 +25,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/utils/useGetUser";
 import toast, { Toaster } from "react-hot-toast";
+import { useLayoutContext } from "@/utils/useLayoutContext";
 
 export enum ProductStatus {
     IN_STOCK = "IN_STOCK",
@@ -38,7 +39,7 @@ const DynamicProductDetailsPage = () => {
     const params = useParams();
     const router = useRouter();
     const productId = params?.productId;
-    const { user } = useAuth()
+    const {user , setCartLength, cartLength} = useLayoutContext()
     const [product, setProduct] = useState<IGetAllProductsData | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [activeImage, setActiveImage] = useState<string>("");
@@ -106,6 +107,7 @@ const DynamicProductDetailsPage = () => {
         })
         if(response.data.data.insertedId){
             toast.success("Product Added to Cart")
+            setCartLength(cartLength + 1)
         }else{
             toast.error("Failed to Add Product to Cart")
         }

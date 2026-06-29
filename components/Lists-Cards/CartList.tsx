@@ -1,14 +1,15 @@
 "use client"
 import { envFile } from "@/config/env";
 import { ICartItem } from "@/interfaces/cart.interface";
+import { useLayoutContext } from "@/utils/useLayoutContext";
 import axios from "axios";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-const CartList = ({item}:{item:ICartItem})=>{
+const CartList = ({item,cartItems,setCartItems}:{item:ICartItem , cartItems:ICartItem[],setCartItems:React.Dispatch<React.SetStateAction<ICartItem[]>>})=>{
 const [quantity , setQuantity] = useState<number>(item.quantity)
-
+const {cartLength , setCartLength} = useLayoutContext()
 const handleQuantityChange = async (id: string, type: "inc" | "dec") => {
   if (type === "inc" && quantity >= 50) return;
   if (type === "dec" && quantity <= 1) return;
@@ -29,8 +30,17 @@ const handleQuantityChange = async (id: string, type: "inc" | "dec") => {
   }
 };
 
-  const handleRemoveItem = (id: string) => {
-    alert(id)
+  const handleRemoveItem = async(id: string) => {
+    const deletedResponse = await axios.delete(`${envFile.BACKEND_URL}/carts/delete-cart/${id}`, { withCredentials: true });
+   console.log(deletedResponse)
+    if(deletedResponse.data.success){
+      toast.success("Cart Deleted")
+      setCartLength(cartLength -1);
+     
+      setCartItems(cartItems.filter(item => item._id !== id))
+    }else{
+      toast.error("Failed to Delete Cart")
+    }
   };
     return(
         <div 
@@ -78,7 +88,6 @@ const handleQuantityChange = async (id: string, type: "inc" | "dec") => {
                 <button
                   type="button"
                   onClick={() => handleQuantityChange(item._id, "inc")}
-                  disabled={item.quantity >= item.stock}
                   className="p-1 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 rounded-md disabled:opacity-30 transition"
                 >
                   <Plus size={12} className="stroke-[2.5]" />

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import  { useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Search,
@@ -12,18 +12,18 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { useAuth } from "@/utils/useGetUser";
 import { authClient } from "@/lib/auth-client";
 import toast, { Toaster } from "react-hot-toast";
-import axios from "axios";
-import { envFile } from "@/config/env";
+import { useLayoutContext } from "@/utils/useLayoutContext";
 
 export default function Navbar() {
-  const { user, loading, setUser } = useAuth()
   const [isOpen, setIsOpen] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [categoryMenuOpen, setCategoryOpen] = useState(false);
-  const [cartLength, setCartLength] = useState(0);
+
+  const {user , setUser, cartLength} = useLayoutContext()
+
+
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Categories", href: "#", hasDropdown: true },
@@ -50,15 +50,7 @@ export default function Navbar() {
       console.log("Logout failed:", error);
     }
   };
-  useEffect(() => {
-    const getCartCount = async () => {
-      const res = await axios.get(`${envFile.BACKEND_URL}/carts/cart-length`, {
-        withCredentials: true
-      });
-      setCartLength(res.data.data);
-    }
-    getCartCount()
-  }, [user])
+
 
   return (
     <>

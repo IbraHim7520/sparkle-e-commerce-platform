@@ -69,7 +69,9 @@ export default function ProductUploadForm() {
 
   payload.images = imageUrls
   
-  const productUploadResponse = await axios.post(`${envFile.BACKEND_URL}/products/add-products`, payload)
+  const productUploadResponse = await axios.post(`${envFile.BACKEND_URL}/products/add-products`, payload, {
+    withCredentials:true
+  })
   
   if(productUploadResponse.data.data.acknowledged){
     toast.success("Product added successfully")

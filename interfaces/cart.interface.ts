@@ -5,7 +5,8 @@ export interface ICartItem {
   discount?: number;
   images: string[];
   quantity: number;
-  stock: number;
+  productId:string
+
 }
 
 export interface IOrderCustomarInfo {
@@ -13,4 +14,13 @@ export interface IOrderCustomarInfo {
   customarAddress:string,
   customarPhone:string,
   customarAdditionalNotes:string
+}
+
+export interface IOrderData {
+  customarName:string,
+  customarAddress:string,
+  customarPhone:string,
+  customarAdditionalNotes?:string
+  cartIds:string[],
+  produtcIds:string[]
 }
