@@ -2,7 +2,7 @@
 
 import { envFile } from "@/config/env";
 import { IGetProductCategory } from "@/interfaces/category.interface";
-import { IUploadProductData } from "@/interfaces/products.interface";
+import { IUploadProductData, ProductStatus } from "@/interfaces/products.interface";
 import axios from "axios";
 import { Plus } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -116,6 +116,24 @@ export default function ProductUploadForm() {
                   required
                 />
               </div>
+
+              <div>
+                <label
+                  htmlFor="brandName"
+                  className="block mb-2 text-sm font-medium text-slate-700"
+                >
+                  Brand Name (Optional)
+                </label>
+                <input
+                {...register("brandName")}
+                  type="text"
+                  id="brandName"
+                  name="brandName"
+                  placeholder="Enter brand name"
+                  className="w-full border border-slate-200 rounded-xl p-3 text-slate-900 placeholder-slate-400 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                  required
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -211,7 +229,7 @@ export default function ProductUploadForm() {
                   <input
                     type="radio"
                     {...register("productStatus")}
-                    value="IN_STOCK"
+                    value={ProductStatus.IN_STOCK}
                     name="productStatus"
                     defaultChecked
                     className="w-5 h-5 text-indigo-600 border-slate-300 focus:ring-indigo-500/20 focus:ring-offset-0"
@@ -225,7 +243,7 @@ export default function ProductUploadForm() {
                   <input
                     type="radio"
                     {...register("productStatus")}
-                    value="UPCOMING"
+                    value={ProductStatus.UPCOMING}
                     name="productStatus"
                     className="w-5 h-5 text-indigo-600 border-slate-300 focus:ring-indigo-500/20 focus:ring-offset-0"
                   />

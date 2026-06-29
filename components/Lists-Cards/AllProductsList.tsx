@@ -1,20 +1,23 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { 
   Search, 
   ArrowUpDown, 
   Calendar, 
-  DollarSign, 
+
   Layers, 
-  SlidersHorizontal,
+
   Trash2,
   Edit2,
   Image as ImageIcon
 } from "lucide-react";
 import { IGetAllProductsData } from "@/interfaces/products.interface";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { envFile } from "@/config/env";
 
-// ProductStatus Enum (আপনার দেওয়া ডেটা অনুযায়ী)
+
 export enum ProductStatus {
   IN_STOCK = "IN_STOCK",
   UPCOMING = "UPCOMING",
@@ -54,11 +57,10 @@ const AllProductsList = ({ products: initialProducts }: AllProductsListProps) =>
     console.log(`Product ${productId} status updated to ${newStatus}`);
   };
 
-  // সার্চ, ফিল্টার এবং সর্টিং মেমোজাইজড লজিক (Performance Optimized)
+
   const filteredAndSortedProducts = useMemo(() => {
     let result = [...products];
 
-    // ১. সার্চ কুয়েরি ফিল্টার
     if (searchQuery.trim() !== "") {
       result = result.filter(p => 
         p.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -66,15 +68,12 @@ const AllProductsList = ({ products: initialProducts }: AllProductsListProps) =>
       );
     }
 
-    // ২. স্ট্যাটাস ফিল্টার
     if (statusFilter !== "ALL") {
       result = result.filter(p => p.productStatus === statusFilter);
     }
 
-    // ৩. ম্যাক্সিমাম প্রাইস ফিল্টার
     result = result.filter(p => p.productPrice <= maxPrice);
 
-    // ৪. সর্টিং অ্যালগরিদম
     if (sortBy === "price-asc") {
       result.sort((a, b) => a.productPrice - b.productPrice);
     } else if (sortBy === "price-desc") {
@@ -89,14 +88,25 @@ const AllProductsList = ({ products: initialProducts }: AllProductsListProps) =>
 
     return result;
   }, [products, searchQuery, sortBy, statusFilter, maxPrice]);
-
+  
+  const handleDeleteProduct = async(productId:string)=>{
+    try{
+      if(!confirm("are you sure you want to delete product?")){
+        return;
+      }
+      const response = await axios.delete(`${envFile.BACKEND_URL}/products/product-deletation/${productId}`);
+      console.log(response)
+      if(response.data){
+        toast.success(response.data.message);
+        setProducts(products.filter(product => product._id !== productId));
+      }
+    }catch(error){
+      console.log(error);
+    }
+  }
   return (
     <div className="space-y-6">
-      
-      {/* Utility কন্ট্রোল বার: সার্চ, ফিল্টার এবং সর্টিং */}
       <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4 lg:space-y-0 lg:flex lg:items-center lg:gap-4 justify-between">
-        
-        {/* সার্চ ইনপুট */}
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input
@@ -107,11 +117,8 @@ const AllProductsList = ({ products: initialProducts }: AllProductsListProps) =>
             className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-sm outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/5 text-slate-800 placeholder-slate-400"
           />
         </div>
-
-        {/* ফিল্টার এবং সর্ট অপশনস গ্রুপ */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
           
-          {/* সর্টিং ড্রপডাউন */}
           <div className="relative">
             <select
               value={sortBy}
@@ -126,7 +133,6 @@ const AllProductsList = ({ products: initialProducts }: AllProductsListProps) =>
             <ArrowUpDown className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
           </div>
 
-          {/* স্ট্যাটাস ফিল্টার */}
           <div className="relative">
             <select
               value={statusFilter}
@@ -140,8 +146,6 @@ const AllProductsList = ({ products: initialProducts }: AllProductsListProps) =>
             </select>
             <Layers className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
           </div>
-
-          {/* ম্যাক্সিমাম প্রাইস স্লাইডার ফিল্টার */}
           <div className="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-1.5 flex flex-col justify-center">
             <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
               <span>Max Price</span>
@@ -161,10 +165,9 @@ const AllProductsList = ({ products: initialProducts }: AllProductsListProps) =>
         </div>
       </div>
 
-      {/* মেইন প্রোডাক্ট লিস্ট ভিউ */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         
-        {/* ডেস্কটপ হেডার রো */}
+  
         <div className="hidden xl:grid grid-cols-12 gap-4 px-6 py-4 bg-slate-50/60 border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-400">
           <div className="col-span-4">Product Details</div>
           <div className="col-span-2">Category</div>
@@ -175,7 +178,7 @@ const AllProductsList = ({ products: initialProducts }: AllProductsListProps) =>
           <div className="col-span-1 text-right">Actions</div>
         </div>
 
-        {/* প্রোডাক্ট আইটেম লুপ */}
+   
         <div className="divide-y divide-slate-100">
           {filteredAndSortedProducts.length > 0 ? (
             filteredAndSortedProducts.map((product) => (
@@ -184,7 +187,7 @@ const AllProductsList = ({ products: initialProducts }: AllProductsListProps) =>
                 className="grid grid-cols-1 xl:grid-cols-12 gap-3 xl:gap-4 px-6 py-4.5 items-center hover:bg-slate-50/30 transition duration-150"
               >
                 
-                {/* ১. প্রোডাক্ট ইনফো ও ইমেজ থাম্বনেইল */}
+           
                 <div className="col-span-1 xl:col-span-4 flex items-center gap-3.5">
                   <div className="w-14 h-14 rounded-xl bg-slate-100 border border-slate-200/50 flex items-center justify-center shrink-0 overflow-hidden relative group/img">
                     {product.images && product.images.length > 0 ? (
@@ -214,12 +217,12 @@ const AllProductsList = ({ products: initialProducts }: AllProductsListProps) =>
                   </div>
                 </div>
 
-                {/* ২. ক্যাটাগরি (Desktop view) */}
+          
                 <div className="hidden xl:block col-span-2 text-sm text-slate-600 font-medium">
                   {product.productCategoryName}
                 </div>
 
-                {/* ৩. প্রাইস ও ডিসকাউন্ট */}
+      
                 <div className="col-span-1 xl:col-span-1 flex xl:block items-center justify-between text-sm">
                   <span className="xl:hidden text-xs text-slate-400 font-medium">Price:</span>
                   <div>
@@ -232,7 +235,7 @@ const AllProductsList = ({ products: initialProducts }: AllProductsListProps) =>
                   </div>
                 </div>
 
-                {/* ৪. স্টক কোয়ান্টিটি কাউন্টার */}
+         
                 <div className="col-span-1 xl:col-span-1 flex xl:justify-center items-center justify-between text-sm">
                   <span className="xl:hidden text-xs text-slate-400 font-medium">Stock Count:</span>
                   <span className={`px-2 py-0.5 rounded-md font-mono text-xs font-semibold ${
@@ -241,8 +244,6 @@ const AllProductsList = ({ products: initialProducts }: AllProductsListProps) =>
                     {product.stock} pcs
                   </span>
                 </div>
-
-                {/* ৫. ইন্টারেক্টিভ স্টক স্ট্যাটাস ড্রপডাউন (আপনার রিকোয়েস্ট অনুযায়ী) */}
                 <div className="col-span-1 xl:col-span-2 flex xl:block items-center justify-between">
                   <span className="xl:hidden text-xs text-slate-400 font-medium">Manage Status:</span>
                   <div className="relative w-40 xl:w-full">
@@ -267,7 +268,6 @@ const AllProductsList = ({ products: initialProducts }: AllProductsListProps) =>
                   </div>
                 </div>
 
-                {/* 🔴 ৬. কালার এবং সাইজ ব্যাজ */}
                 <div className="col-span-1 xl:col-span-1 flex xl:justify-center items-center justify-between text-sm">
                   <span className="xl:hidden text-xs text-slate-400 font-medium">Attributes:</span>
                   <div className="flex gap-1.5">
@@ -294,14 +294,13 @@ const AllProductsList = ({ products: initialProducts }: AllProductsListProps) =>
                     title="Delete Product"
                     className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition"
                   >
-                    <Trash2 size={15} />
+                    <Trash2 onClick={() => handleDeleteProduct(product._id)} size={15} />
                   </button>
                 </div>
 
               </div>
             ))
           ) : (
-           
             <div className="p-16 text-center text-slate-400">
               <p className="text-base font-semibold">No matching items found</p>
               <p className="text-xs mt-1 text-slate-400/80">Refine your active search query or filter cap limits.</p>

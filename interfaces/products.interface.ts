@@ -17,6 +17,8 @@ export interface IUploadProductData {
     productDescription:string
     productAdditionalInfo?:string,
     tags?:string[]
+    brandName:string,
+    color: string[]
 }
 
 //  productName: z.string().min(1 , "Product name is required"),

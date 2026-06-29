@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Plus, Package, AlertTriangle, XCircle } from "lucide-react";
 import { envFile } from "@/config/env";
 import { IGetAllProductsData, ProductStatus } from "@/interfaces/products.interface";
-import AllProductsList from "@/components/Lists/AllProductsList";
+import AllProductsList from "@/components/Lists-Cards/AllProductsList";
 
 
 
@@ -23,7 +23,7 @@ async function getProducts() {
 
 export default async function ProductManagementPage() {
   const products:IGetAllProductsData[] = await getProducts();
-  console.log(products)
+
 
   const totalProducts = products.length
   const lowStock = products.filter(p => p.stock <= 10).length

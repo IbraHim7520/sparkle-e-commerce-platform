@@ -3,38 +3,26 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, ShoppingBag } from "lucide-react";
+import { useEffect, useState } from "react";
+import { IGetAllProductsData } from "@/interfaces/products.interface";
+import axios from "axios";
+import { envFile } from "@/config/env";
+import ProductCard from "../Lists-Cards/ProductsCard";
 
 export function FeaturedProducts() {
-  const products = [
-    {
-      id: 1,
-      title: "Oversized Street Hoodie",
-      price: "$49",
-      image:
-        "https://images.unsplash.com/photo-1578768079052-aa76e52ff62e?fm=jpg",
-    },
-    {
-      id: 2,
-      title: "Minimalist White Tee",
-      price: "$29",
-      image:
-        "https://images.unsplash.com/photo-1574180566232-aaad1b5b8450?fm=jpg",
-    },
-    {
-      id: 3,
-      title: "Relaxed Fit Jacket",
-      price: "$89",
-      image:
-        "https://images.unsplash.com/photo-1555583743-991174c11425?fm=jpg",
-    },
-    {
-      id: 4,
-      title: "Urban Cargo Pants",
-      price: "$59",
-      image:
-        "https://images.unsplash.com/photo-1649850874075-49e014357b9d?fm=jpg",
-    },
-  ];
+  const [products ,setFeaturedProducts] = useState<IGetAllProductsData[]>([])
+  const [loading, setLoading] = useState(false);
+  useEffect(()=>{
+    setLoading(true)
+    const fetchingData = async()=>{
+      const response =  await axios.get(`${envFile.BACKEND_URL}/products/featured/products`);
+      setFeaturedProducts(response.data.data)
+      setLoading(false)
+    }
+    fetchingData()
+  },[])
+
+
 
   return (
     <section className="py-16 bg-white">
@@ -60,38 +48,7 @@ export function FeaturedProducts() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
           {products.map((p) => (
-            <div
-              key={p.id}
-              className="group border border-slate-100 rounded-2xl overflow-hidden hover:shadow-lg transition"
-            >
-              <div className="relative h-64 bg-slate-100">
-                <Image
-                  src={p.image}
-                  alt={p.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition duration-500"
-                />
-
-                <button className="absolute top-3 right-3 p-2 bg-white rounded-full shadow hover:text-rose-500">
-                  <Heart className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="p-4">
-                <h3 className="text-sm font-medium">{p.title}</h3>
-
-                <div className="flex items-center justify-between mt-3">
-                  <span className="font-bold text-slate-900">
-                    {p.price}
-                  </span>
-
-                  <button className="flex items-center gap-1 text-xs bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-600">
-                    <ShoppingBag className="w-3 h-3" />
-                    Add
-                  </button>
-                </div>
-              </div>
-            </div>
+              <ProductCard p={p}/>
           ))}
         </div>
       </div>

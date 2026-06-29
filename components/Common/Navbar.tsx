@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Search,
@@ -15,17 +15,15 @@ import {
 import { useAuth } from "@/utils/useGetUser";
 import { authClient } from "@/lib/auth-client";
 import toast, { Toaster } from "react-hot-toast";
+import axios from "axios";
+import { envFile } from "@/config/env";
 
 export default function Navbar() {
-
-
-
-
-  const { user, loading , setUser } = useAuth()
-  console.log(user)
+  const { user, loading, setUser } = useAuth()
   const [isOpen, setIsOpen] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-const [categoryMenuOpen, setCategoryOpen] = useState(false);
+  const [categoryMenuOpen, setCategoryOpen] = useState(false);
+  const [cartLength, setCartLength] = useState(0);
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Categories", href: "#", hasDropdown: true },
@@ -33,31 +31,34 @@ const [categoryMenuOpen, setCategoryOpen] = useState(false);
     { name: "Deals", href: "/deals" },
   ];
 
-const Categories = [
-  { name: "Men's Fashion", href: "/categories/men" },
-  { name: "Women's Fashion", href: "/categories/women" },
-  { name: "Accessories", href: "/categories/accessories" },
-  { name: "Shoes", href: "/categories/shoes" },
-];
+  const Categories = [
+    { name: "Men's Fashion", href: "/categories/men" },
+    { name: "Women's Fashion", href: "/categories/women" },
+    { name: "Accessories", href: "/categories/accessories" },
+    { name: "Shoes", href: "/categories/shoes" },
+  ];
 
-  // if (loading) {
-  //   return (
-  //     <div>
 
-  //     </div>
-  //   )
-  // }
 
-const handleUserLogout = async () => {
-  try {
-    await authClient.signOut();
-    toast.success("Logout successful");
-    setUser(null);
-  } catch (error) {
-    toast.error("Logout failed")
-    console.log("Logout failed:", error);
-  }
-};
+  const handleUserLogout = async () => {
+    try {
+      await authClient.signOut();
+      toast.success("Logout successful");
+      setUser(null);
+    } catch (error) {
+      toast.error("Logout failed")
+      console.log("Logout failed:", error);
+    }
+  };
+  useEffect(() => {
+    const getCartCount = async () => {
+      const res = await axios.get(`${envFile.BACKEND_URL}/carts/cart-length`, {
+        withCredentials: true
+      });
+      setCartLength(res.data.data);
+    }
+    getCartCount()
+  }, [user])
 
   return (
     <>
@@ -85,46 +86,46 @@ const handleUserLogout = async () => {
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex space-x-8 text-sm font-medium">
-        {navLinks.map((link) =>
-  link.name === "Categories" ? (
-    <div key={link.name} className="relative">
+              {navLinks.map((link) =>
+                link.name === "Categories" ? (
+                  <div key={link.name} className="relative">
 
-      <button
-        onClick={() => setCategoryOpen(!categoryMenuOpen)}
-        className="flex items-center gap-1 text-slate-600 hover:text-indigo-600"
-      >
-        Categories
-        {categoryMenuOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-      </button>
+                    <button
+                      onClick={() => setCategoryOpen(!categoryMenuOpen)}
+                      className="flex items-center gap-1 text-slate-600 hover:text-indigo-600"
+                    >
+                      Categories
+                      {categoryMenuOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </button>
 
-      {/* Dropdown */}
-      {categoryMenuOpen && (
-        <div className="absolute top-full left-0 mt-3 w-56 bg-white border border-gray-200 shadow-lg rounded-lg z-50">
+                    {/* Dropdown */}
+                    {categoryMenuOpen && (
+                      <div className="absolute top-full left-0 mt-3 w-56 bg-white border border-gray-200 shadow-lg rounded-lg z-50">
 
-          {Categories.map((cat) => (
-            <Link
-              key={cat.name}
-              href={cat.href}
-              onClick={() => setCategoryOpen(false)}
-              className="block px-4 py-2 text-sm text-slate-600 hover:bg-indigo-50 hover:text-indigo-600"
-            >
-              {cat.name}
-            </Link>
-          ))}
+                        {Categories.map((cat) => (
+                          <Link
+                            key={cat.name}
+                            href={cat.href}
+                            onClick={() => setCategoryOpen(false)}
+                            className="block px-4 py-2 text-sm text-slate-600 hover:bg-indigo-50 hover:text-indigo-600"
+                          >
+                            {cat.name}
+                          </Link>
+                        ))}
 
-        </div>
-      )}
-    </div>
-  ) : (
-    <Link
-      key={link.name}
-      href={link.href}
-      className="flex items-center gap-1 text-slate-600 hover:text-indigo-600"
-    >
-      {link.name}
-    </Link>
-  )
-)}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className="flex items-center gap-1 text-slate-600 hover:text-indigo-600"
+                  >
+                    {link.name}
+                  </Link>
+                )
+              )}
             </div>
 
             {/* Premium Search */}
@@ -150,7 +151,7 @@ const handleUserLogout = async () => {
                 >
                   <ShoppingCart className="w-5 h-5" />
                   <span className="absolute top-1 right-1 bg-indigo-600 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
-                    3
+                    {cartLength}
                   </span>
                 </Link>
               )}
@@ -171,7 +172,7 @@ const handleUserLogout = async () => {
                         Profile
                       </Link>
 
-  
+
 
                       {/* ADMIN ONLY */}
                       {user.role === "ADMIN" && (
