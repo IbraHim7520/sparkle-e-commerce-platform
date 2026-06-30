@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import Link from "next/link";
-import { ICartItem } from "@/interfaces/cart.interface";
 import CartList from "./CartList";
+import { IGetCartItem } from "@/interfaces/cart.interface";
 
 
-export default function CartItemsList({ initialItems }: { initialItems: ICartItem[] }) {
-  const [cartItems, setCartItems] = useState<ICartItem[]>(initialItems);
+export default function CartItemsList({ initialItems }: { initialItems: IGetCartItem[] }) {
+  const [cartItems, setCartItems] = useState<IGetCartItem[]>(initialItems);
 
 
 

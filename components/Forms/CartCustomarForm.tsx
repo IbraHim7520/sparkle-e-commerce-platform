@@ -4,12 +4,12 @@ import { useState } from "react";
 import { User, Phone, MapPin, FileText, ShoppingBag } from "lucide-react";
 import axios from "axios";
 import { envFile } from "@/config/env";
-import { ICartItem, IOrderCustomarInfo, IOrderData } from "@/interfaces/cart.interface";
+import { IGetCartItem, IOrderCustomarInfo, IOrderData } from "@/interfaces/cart.interface";
 import { useForm } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
 
 interface ICheckoutFormProps {
-  cartItems: ICartItem[];
+  cartItems: IGetCartItem[];
 }
 
 export default function CheckoutForm({ cartItems }: ICheckoutFormProps) {
@@ -28,21 +28,14 @@ export default function CheckoutForm({ cartItems }: ICheckoutFormProps) {
  
   const onSubmit = async (data:IOrderCustomarInfo) => {
     
-    const cartIds = cartItems.map(item=>{
-      return item._id
-    })
-    const produtcIds = cartItems.map(item=>{
-      return item.productId
-    })
-
-    const orderData: IOrderData = {
-      customarName: data.customarName,
-      customarPhone: data.customarPhone, 
-      customarAddress: data.customarAddress,
-      customarAdditionalNotes: data.customarAdditionalNotes,
-      cartIds: cartIds,
-      produtcIds: produtcIds
-    }
+  const orderData = {
+    customarName: data.customarName,
+    customarPhone: data.customarPhone,
+    customarAddress: data.customarAddress,
+    customarAdditionalNotes: data.customarAdditionalNotes,
+    cartIds: cartItems.map(item => item._id),
+  };
+    
 
     try {
       const orderResponse = await axios.post(`${envFile.BACKEND_URL}/orders/create-order`, orderData, {

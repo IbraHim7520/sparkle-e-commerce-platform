@@ -6,19 +6,17 @@ export enum ProductStatus {
 export interface IUploadProductData {
     productName:string,
     productPrice: number,
-    productCategoryId: string,
     productCategoryName: string,
     stock:number,
     discount?:number,
     productStatus: ProductStatus,
     images: string[] | FileList
-    productSize: string,
-    productColor: string,
+    productSizes: string,
+    productColors: string,
     productDescription:string
     productAdditionalInfo?:string,
-    tags?:string[]
+    tags?:string
     brandName:string,
-    color: string[]
 }
 
 //  productName: z.string().min(1 , "Product name is required"),
@@ -37,20 +35,20 @@ export interface IUploadProductData {
 
 
 export interface IGetAllProductsData {
-    _id:string
-    productName: string;
-    productPrice: number;
-    productCategoryId: string;
-    productCategoryName: string;
-    stock: number;
-    discount?: number;
-    productStatus: ProductStatus;
-    images: string[];
-    productSize: string;
-    productColor: string;
-    productDescription: string;
-    productAdditionalInfo?: string;
-    tags?: string[];
-    createdAt?: string;
-    updatedAt?: string;
+  _id: string;
+  productName: string;
+  productPrice: number;
+  productCategoryName: string; 
+  stock: number;
+  discount?: number;
+  productStatus: ProductStatus;
+  images: string[];
+  productSizes: string[];       
+  productColors: string[];      
+  productDescription: string;
+  productAdditionalInfo?: string;
+  tags?: string[];
+  brandName: string;            
+  createdAt?: string;
+  updatedAt?: string;
 }

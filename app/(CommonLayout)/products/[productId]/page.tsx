@@ -35,6 +35,8 @@ export enum ProductStatus {
 
 const DynamicProductDetailsPage = () => {
     const [quantity, setQuantity] = useState<number>(1);
+    const [selectedSize , setSelectedSize] = useState<string>("")
+    const [selectedColor , setSelectedColor] = useState<string>("")
 
     const params = useParams();
     const router = useRouter();
@@ -55,7 +57,7 @@ const DynamicProductDetailsPage = () => {
                     { signal: controller.signal }
                 );
                 const productData = response.data.data;
-
+                console.log((productData))
                 setProduct(productData);
                 if (productData?.images && productData.images.length > 0) {
                     setActiveImage(productData.images[0]);
@@ -94,16 +96,25 @@ const DynamicProductDetailsPage = () => {
         }
     }
 
-    const handleAddtoCart = async (productId: string , quality:number) => {
+    const handleAddtoCart = async (productId: string , quantity:number) => {
         if (!user) {
             router.push("/login");
             return;
         }
-        
-        const response = await axios.post(`${envFile.BACKEND_URL}/carts/add-cart`, {
+        if(!selectedSize || !selectedColor){
+            toast.error("Please select a size and color")
+            return
+        }
+        const cartData = {
             userId: user.id,
             productId: productId,
-            quantity: quality
+            quantity: quantity,
+            selectedSize,
+            selectedColor
+        }
+
+        const response = await axios.post(`${envFile.BACKEND_URL}/carts/add-cart`, cartData, {
+            withCredentials: true
         })
         if(response.data.data.insertedId){
             toast.success("Product Added to Cart")
@@ -239,36 +250,84 @@ const DynamicProductDetailsPage = () => {
                         </div>
                     </div>
 
-                    {/* ইনভেন্টরি প্যারামিটারস */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 border-t border-b border-slate-100 py-5">
-                        <div>
-                            <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Stock Level</span>
-                            <span className={`inline-flex items-center text-sm font-semibold font-mono ${product.stock === 0 ? "text-rose-600" : "text-slate-800"
-                                }`}>
-                                {product.stock} Units Available
-                            </span>
-                        </div>
+{/* ইনভেন্টরি প্যারামিটারস */}
+<div className="grid grid-cols-2 sm:grid-cols-3 gap-4 border-t border-b border-slate-100 py-5">
+  
+  {/* স্টক লেভেল */}
+  <div>
+    <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+      Stock Level
+    </span>
+    <span className={`inline-flex items-center text-sm font-semibold font-mono ${
+      product.stock === 0 ? "text-rose-600" : "text-emerald-600"
+    }`}>
+      {product.stock === 0 ? "Out of Stock" : `${product.stock} Units Available`}
+    </span>
+  </div>
 
-                        <div>
-                            <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Size Parameter</span>
-                            <span className="inline-flex px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-md uppercase">
-                                {product.productSize || "Universal"}
-                            </span>
-                        </div>
+  {/* সাইজ প্যারামিটারস */}
+  <div>
+    <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+      Size Parameter
+    </span>
+    <div className="flex flex-wrap gap-1.5">
+      {product.productSizes?.map((size, idx) => {
+        const isSelected = selectedSize === size;
+        const isOutOfStock = product.stock === 0;
 
-                        <div className="col-span-2 sm:col-span-1">
-                            <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Color Swatch</span>
-                            <div className="flex items-center gap-2">
-                                <span
-                                    className="w-5 h-5 rounded-full border border-slate-300 shadow-sm block shrink-0"
-                                    style={{ backgroundColor: product.productColor || "#ccc" }}
-                                />
-                                <span className="text-xs font-medium text-slate-500 font-mono">
-                                    {product.productColor || "Standard"}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+        return (
+          <button
+            key={idx}
+            type="button"
+            disabled={isOutOfStock}
+            onClick={() => setSelectedSize(size)}
+            className={`inline-flex px-2.5 py-1.5 text-xs font-bold rounded-md uppercase border transition-all ${
+              isOutOfStock 
+                ? "bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed"
+                : isSelected
+                  ? "bg-indigo-600 border-indigo-600 text-white shadow-sm"
+                  : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200 hover:border-slate-300 cursor-pointer"
+            }`}
+          >
+            {size}
+          </button>
+        );
+      })}
+    </div>
+  </div>
+
+  {/* কালার সোয়াচ */}
+  <div className="col-span-2 sm:col-span-1">
+    <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+      Color Swatch
+    </span>
+    <div className="flex flex-wrap items-center gap-1.5">
+      {product.productColors?.map((color, idx) => {
+        const isSelected = selectedColor === color;
+        const isOutOfStock = product.stock === 0;
+
+        return (
+          <button
+            key={idx}
+            type="button"
+            disabled={isOutOfStock}
+            onClick={() => setSelectedColor(color)}
+            className={`inline-flex px-2.5 py-1.5 text-xs font-bold rounded-md uppercase border transition-all ${
+              isOutOfStock 
+                ? "bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed"
+                : isSelected
+                  ? "bg-indigo-600 border-indigo-600 text-white shadow-sm"
+                  : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200 hover:border-slate-300 cursor-pointer"
+            }`}
+          >
+            {color}
+          </button>
+        );
+      })}
+    </div>
+  </div>
+
+</div>
 
 
                     {product.tags && product.tags.length > 0 && (
@@ -276,7 +335,7 @@ const DynamicProductDetailsPage = () => {
                             <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Search Tags</span>
                             <div className="flex flex-wrap gap-1.5">
                                 {product.tags.map((tag, idx) => (
-                                    <span key={idx} className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-indigo-50/60 text-indigo-700 border border-indigo-100/50 text-xs font-medium rounded-lg">
+                                    <span key={idx} className="inline-flex  items-center gap-1 px-2.5 py-0.5 bg-indigo-50/60 text-indigo-700 border border-indigo-100/50 text-xs font-medium rounded-lg">
                                         <Tag size={10} /> {tag}
                                     </span>
                                 ))}

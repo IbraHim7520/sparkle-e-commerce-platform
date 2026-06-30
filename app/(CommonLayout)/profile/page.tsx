@@ -11,58 +11,74 @@ import {
   KeyRound, 
   Edit3, 
   CheckCircle2, 
-  Clock 
+  Clock,
+  Star,
+  MapPin,
+  Phone,
+  FileText,
+  AlertCircle
 } from "lucide-react";
 import { useLayoutContext } from "@/utils/useLayoutContext";
 import axios from "axios";
 import { envFile } from "@/config/env";
-
-
-
+import { IGetMyOrderedData } from "@/interfaces/cart.interface";
+import Image from "next/image";
 
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState<"settings" | "orders">("settings");
-  const {user, setUser , cartLength} = useLayoutContext()
-  const [myOrders , setMyOrders] = useState<any[]>([])
-  useEffect(()=>{
-    const fetchMyOrders = async()=>{
-      const response = await axios.get(`${envFile.BACKEND_URL}/orders/my-orders`, {
-        withCredentials:true
-      })
-      setMyOrders(response.data.data)
-    }
-    fetchMyOrders()
-  },[])
-  console.log(myOrders)
-  const [orders] = useState<IOrder[]>([
-    { orderId: "ORD-9921", date: "25 June 2026", totalAmount: 518.00, status: "Delivered", itemsCount: 3 },
-    { orderId: "ORD-8712", date: "12 June 2026", totalAmount: 120.00, status: "Processing", itemsCount: 1 },
-    { orderId: "ORD-4510", date: "01 May 2026", totalAmount: 89.99, status: "Pending", itemsCount: 2 },
-  ]);
+  const { user, setUser, cartLength } = useLayoutContext();
+  const [myOrders, setMyOrders] = useState<IGetMyOrderedData[]>([]);
 
+  useEffect(() => {
+    const fetchMyOrders = async () => {
+      try {
+        const response = await axios.get(`${envFile.BACKEND_URL}/orders/my-orders`, {
+          withCredentials: true
+        });
+        if (response.data?.data) {
+          setMyOrders(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
+    };
+    fetchMyOrders();
+  }, []);
 
-  const [newName, setNewName] = useState(user?.name);
+  const [newName, setNewName] = useState(user?.name || "");
   const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
 
+  useEffect(() => {
+    if (user?.name) {
+      setNewName(user.name);
+    }
+  }, [user]);
+
   const handleUpdateName = (e: React.FormEvent) => {
+    e.preventDefault();
     alert("Name updated successfully!");
   };
 
   const handleUpdatePassword = (e: React.FormEvent) => {
+    e.preventDefault();
     alert("Password updated successfully!");
   };
 
   const handleLogout = () => {
-   alert("logout")
+    alert("logout");
+  };
+
+  const handleGiveReview = (productId: string) => {
+    alert(`Redirecting to review system for product ID: ${productId}`);
   };
 
   return (
     <div className="w-full max-w-7xl mx-auto p-4 md:p-6 space-y-6">
       
-      {/* ১. টপ প্রোফাইল ব্যানার/হেডার */}
+      {/* ইউজার হেডার কার্ড */}
       <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row items-center gap-5">
         <div className="w-20 h-20 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center font-black text-2xl tracking-wider uppercase shadow-inner">
-          {user?.name.split(" ").map(n => n[0]).join("")}
+          {user?.name ? user.name.split(" ").map((n: string) => n[0]).join("") : "U"}
         </div>
         <div className="text-center sm:text-left space-y-1 flex-1">
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">{user?.name}</h1>
@@ -75,9 +91,8 @@ const UserProfile = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-
+        {/* সাইডবার নেভিগেশন */}
         <div className="lg:col-span-4 bg-white border border-slate-100 rounded-2xl p-4 shadow-xs space-y-2">
-          
           <button
             type="button"
             onClick={() => setActiveTab("settings")}
@@ -112,16 +127,14 @@ const UserProfile = () => {
               <LogOut size={16} /> Log Out Account
             </button>
           </div>
-
         </div>
 
-        {/* ডান পাশ: কন্টেন্ট প্যানেল (lg:col-span-8) */}
+        {/* মেইন কন্টেন্ট এরিয়া */}
         <div className="lg:col-span-8 space-y-6">
           
-          {/* ট্যাব ১: প্রোফাইল চেঞ্জ ও সিকিউরিটি সেটিংস */}
+          {/* ট্যাব: সেটিংস */}
           {activeTab === "settings" && (
             <>
-              {/* নাম পরিবর্তন ফর্ম */}
               <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs space-y-4">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 tracking-tight">Personal Information</h3>
@@ -147,7 +160,6 @@ const UserProfile = () => {
                 </form>
               </div>
 
-              {/* পাসওয়ার্ড পরিবর্তন ফর্ম */}
               <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs space-y-4">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 tracking-tight">Security Credentials</h3>
@@ -206,7 +218,7 @@ const UserProfile = () => {
             </>
           )}
 
-          {/* ট্যাব ২: অর্ডার হিস্ট্রি লিস্ট */}
+          {/* ট্যাব: অর্ডার হিস্ট্রি */}
           {activeTab === "orders" && (
             <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs space-y-4">
               <div>
@@ -214,40 +226,133 @@ const UserProfile = () => {
                 <p className="text-xs text-slate-400">Track and monitor status invoices of your purchases</p>
               </div>
 
-              {orders.length === 0 ? (
-                <div className="text-center py-8 text-slate-400 text-xs font-medium">No order logs found in your system.</div>
+              {myOrders.length === 0 ? (
+                <div className="text-center py-8 text-slate-400 text-xs font-medium">
+                  No order logs found in your system.
+                </div>
               ) : (
-                <div className="space-y-3">
-                  {orders.map(order => (
-                    <div key={order.orderId} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-slate-100 rounded-xl bg-slate-50/40 gap-3 hover:border-slate-200 transition">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-slate-800 font-mono">{order.orderId}</span>
-                          <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            order.status === "Delivered" ? "bg-emerald-50 text-emerald-600" :
-                            order.status === "Processing" ? "bg-amber-50 text-amber-600" : "bg-blue-50 text-blue-600"
-                          }`}>
-                            {order.status === "Delivered" ? <CheckCircle2 size={10} /> : <Clock size={10} />}
-                            {order.status}
-                          </span>
+                <div className="space-y-5">
+                  {myOrders.map((order: IGetMyOrderedData) => {
+                    const formattedDate = new Date(order.createdAt).toLocaleDateString("en-US", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    });
+
+                    return (
+                      <div 
+                        key={order._id} 
+                        className="flex flex-col border border-slate-100 rounded-xl bg-white overflow-hidden hover:border-slate-200 transition shadow-xs"
+                      >
+                        {/* অর্ডার কার্ড টপবার */}
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 bg-slate-50/60 border-b border-slate-100 w-full">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-slate-800 bg-slate-200/80 px-2.5 py-0.5 rounded font-mono">
+                                #{order._id.slice(-6).toUpperCase()}
+                              </span>
+                              
+                              <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                                order.orderStatus === "Delivered" ? "bg-emerald-50 text-emerald-600 border border-emerald-100" :
+                                order.orderStatus === "Processing" ? "bg-amber-50 text-amber-600 border border-amber-100" : 
+                                "bg-blue-50 text-blue-600 border border-blue-100"
+                              }`}>
+                                {order.orderStatus === "Delivered" ? <CheckCircle2 size={11} /> : <Clock size={11} />}
+                                {order.orderStatus}
+                              </span>
+                            </div>
+                            
+                            <p className="text-xs text-slate-500 font-medium">
+                              {formattedDate} • {order.Orderitems?.length || 0} {order.Orderitems?.length > 1 ? "Items" : "Item"} purchased
+                            </p>
+                          </div>
+
+                          <div className="text-left sm:text-right w-full sm:w-auto flex sm:flex-col justify-between sm:justify-start items-center sm:items-end">
+                            <span className="text-base font-black text-slate-900 font-mono">
+                              ${order.grandTotal.toFixed(2)}
+                            </span>
+                            <button type="button" className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:underline">
+                              <FileText size={12} /> View Invoice
+                            </button>
+                          </div>
                         </div>
-                        <p className="text-xs text-slate-400 font-medium">{order.date} • {order.itemsCount} Items purchased</p>
+
+                        {/* অর্ডারড প্রোডাক্ট লিস্ট (Orderitems) */}
+                        <div className="p-4 border-b border-slate-50 grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {order.Orderitems?.map((item, idx) => (
+                            <div key={item.productId + idx} className="flex items-center justify-between gap-3 bg-slate-50/40 p-3 rounded-xl border border-slate-100">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="w-12 h-12 bg-white border border-slate-100 rounded-lg overflow-hidden shrink-0 flex items-center justify-center relative p-1">
+                                  <Image 
+                                    width={60} 
+                                    height={60} 
+                                    src={item.image || "/placeholder.png"} 
+                                    alt={item.productName} 
+                                    className="max-w-full max-h-full object-contain" 
+                                  />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-xs font-bold text-slate-800 truncate tracking-tight mb-0.5">
+                                    {item.productName}
+                                  </p>
+                                  <p className="text-[11px] font-black font-mono text-slate-500">
+                                    ${item.productPrice.toFixed(2)} x {item.quantity}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {order.orderStatus === "Delivered" && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleGiveReview(item.productId)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white text-[10px] font-bold rounded-lg transition shrink-0 border border-slate-200"
+                                >
+                                  <Star size={10} className="fill-current" />
+                                  Review
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* কাস্টমার ডেলিভারি ও প্রাইস সামারি */}
+                        <div className="p-4 bg-slate-50/20 text-xs text-slate-600 space-y-2">
+                          <div className="flex items-start gap-2">
+                            <MapPin size={14} className="text-slate-400 mt-0.5 shrink-0" />
+                            <div className="space-y-0.5">
+                              <p className="font-bold text-slate-700">
+                                {order.customarName} <span className="text-slate-400 font-mono text-[11px]">({order.customarPhone})</span>
+                              </p>
+                              <p className="text-slate-500 text-[11px]">{order.customarAddress}</p>
+                            </div>
+                          </div>
+
+                          {order.customarAdditionalNotes && (
+                            <div className="flex items-start gap-2 border-t border-slate-100 pt-2 text-[11px]">
+                              <AlertCircle size={13} className="text-amber-500 mt-0.5 shrink-0" />
+                              <p className="text-slate-500 italic">
+                                <strong>Note:</strong> "{order.customarAdditionalNotes}"
+                              </p>
+                            </div>
+                          )}
+
+                          {/* সাবটোটাল ও ডেলিভারি চার্জ বার */}
+                          <div className="flex justify-between items-center border-t border-slate-100 pt-2 text-[11px] text-slate-400 font-mono font-medium">
+                            <span>Subtotal: ${order.totalPrice.toFixed(2)}</span>
+                            <span>Delivery: ${order.deliveryCharge.toFixed(2)}</span>
+                          </div>
+                        </div>
+
                       </div>
-                      <div className="text-left sm:text-right w-full sm:w-auto">
-                        <span className="block text-sm font-black text-slate-900 font-mono">${order.totalAmount.toFixed(2)}</span>
-                        <button type="button" className="text-[11px] font-bold text-indigo-600 hover:underline mt-0.5">View Invoice Details</button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
           )}
 
         </div>
-
       </div>
-
     </div>
   );
 };

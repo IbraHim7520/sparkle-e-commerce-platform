@@ -1,15 +1,18 @@
 "use client"
 import { envFile } from "@/config/env";
-import { ICartItem } from "@/interfaces/cart.interface";
+import { IGetCartItem } from "@/interfaces/cart.interface";
 import { useLayoutContext } from "@/utils/useLayoutContext";
 import axios from "axios";
 import { Minus, Plus, Trash2 } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-const CartList = ({item,cartItems,setCartItems}:{item:ICartItem , cartItems:ICartItem[],setCartItems:React.Dispatch<React.SetStateAction<ICartItem[]>>})=>{
+const CartList = ({item,cartItems,setCartItems}:{item:IGetCartItem , cartItems:IGetCartItem[],setCartItems:React.Dispatch<React.SetStateAction<IGetCartItem[]>>})=>{
 const [quantity , setQuantity] = useState<number>(item.quantity)
 const {cartLength , setCartLength} = useLayoutContext()
+
+console.log(cartItems)
 const handleQuantityChange = async (id: string, type: "inc" | "dec") => {
   if (type === "inc" && quantity >= 50) return;
   if (type === "dec" && quantity <= 1) return;
@@ -48,7 +51,8 @@ const handleQuantityChange = async (id: string, type: "inc" | "dec") => {
             className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-4 transition hover:border-slate-200/80"
           >
             <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-xl overflow-hidden shrink-0 p-2 flex items-center justify-center">
-              <img 
+              <Image
+              width={100} height={100} quality={100} priority
                 src={item.images[0]} 
                 alt={item.productName} 
                 className="max-w-full max-h-full object-contain mix-blend-multiply"
@@ -59,7 +63,12 @@ const handleQuantityChange = async (id: string, type: "inc" | "dec") => {
             <div className="flex-1 min-w-0 space-y-1.5">
               <h3 className="text-sm font-bold text-slate-800 tracking-tight truncate">
                 {item.productName}
+              <p className="text-xs text-slate-500">
+                {item.selectedColor && `Color: ${item.selectedColor}`}
+                {item.selectedSize && ` | Size: ${item.selectedSize}`}
+              </p>
               </h3>
+
               
               <div className="flex items-baseline gap-2">
                 <span className="text-sm font-black text-slate-900">
