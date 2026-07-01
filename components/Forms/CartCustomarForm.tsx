@@ -22,8 +22,11 @@ export default function CheckoutForm({ cartItems }: ICheckoutFormProps) {
     return price
   })
   const subtotal = totalProductPrice.reduce((acc,price)=>acc + price , 0)
-
-   const shipping = 80;
+  let shipping = 80;
+    if (subtotal > 2000) {
+    shipping = 0;
+    toast.success("Congratulations! You have got free shipping.")
+  } 
    const grandTotal = subtotal + shipping;
  
   const onSubmit = async (data:IOrderCustomarInfo) => {

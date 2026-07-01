@@ -37,9 +37,8 @@ export default function Footer() {
                 <Image width={20} height={20} src={youtubeImage.src} alt="Youtube" className="w-4 h-4" />
               </a>
             </div>
-          </div>3
+          </div>
 
-          {/* Shop */}
           <div>
             <h3 className="text-sm font-bold text-slate-900 mb-4">Shop</h3>
             <div className="space-y-3 text-sm text-slate-600">

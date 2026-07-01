@@ -17,22 +17,28 @@ export default function ProductUploadForm() {
   // Track actual selected files for each dynamic upload slot
   const [imageFiles, setImageFiles] = useState<(File | null)[]>([]);
 
-  const uploadImageToCloudinary = async (imgFile: File) => {
-    const formData = new FormData();
-    formData.append("file", imgFile);
-    formData.append("upload_preset", envFile.CLOUDINARY_PRESET as string);
+const uploadImageToCloudinary = async (imgFile: File): Promise<string> => {
+  const formData = new FormData();
 
-    const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${envFile.CLOUDINARY_NAME}/image/upload`,
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
+  formData.append("file", imgFile);
+  formData.append("upload_preset", envFile.CLOUDINARY_PRESET as string);
 
-    const data = await response.json();
-    return data.secure_url;
-  };
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${envFile.CLOUDINARY_NAME}/image/upload`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error?.message || "Cloudinary Upload Failed");
+  }
+
+  return data.secure_url;
+};
 
   useEffect(() => {
     axios.get(envFile.BACKEND_URL + "/categories/all-cats").then((response) => {
@@ -63,7 +69,6 @@ export default function ProductUploadForm() {
   };
 
   const onSubmit: SubmitHandler<IUploadProductData> = async (data: IUploadProductData) => {
-    // Validate that at least one valid file has been selected
     const validFiles = imageFiles.filter((file): file is File => file !== null);
     if (validFiles.length === 0) {
       toast.error("Please upload at least one image.");
@@ -103,8 +108,8 @@ export default function ProductUploadForm() {
 
     try {
       const imageUrls = await Promise.all(
-        validFiles.map((file) => uploadImageToCloudinary(file))
-      );
+    validFiles.map(uploadImageToCloudinary)
+);
 
       payload.images = imageUrls;
       console.log(payload)

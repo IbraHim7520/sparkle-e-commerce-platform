@@ -39,7 +39,7 @@ export function FeaturedProducts() {
           </div>
 
           <Link
-            href="/shop"
+            href="/deals"
             className="text-sm text-indigo-600 font-medium hover:underline"
           >
             View All

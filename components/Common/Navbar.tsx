@@ -32,10 +32,10 @@ export default function Navbar() {
   ];
 
   const Categories = [
-    { name: "Men's Fashion", href: "/categories/men" },
-    { name: "Women's Fashion", href: "/categories/women" },
-    { name: "Accessories", href: "/categories/accessories" },
-    { name: "Shoes", href: "/categories/shoes" },
+    { name: "Men's Fashion", href: "/products" },
+    { name: "Women's Fashion", href: "/products" },
+    { name: "Accessories", href: "/products" },
+    { name: "Shoes", href: "/products" },
   ];
 
 
@@ -56,7 +56,7 @@ export default function Navbar() {
     <>
       {/* Announcement Bar */}
       <div className="bg-slate-900 text-white text-center py-2 text-[11px] tracking-[0.25em] uppercase">
-        Free Shipping on Orders Over $75
+        Free Shipping on Orders Over $2000
       </div>
 
       <Toaster />

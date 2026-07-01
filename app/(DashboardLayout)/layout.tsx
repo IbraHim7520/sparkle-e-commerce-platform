@@ -60,11 +60,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           path: "/dashboard/orders",
           icon: <Boxes size={20} />,
         },
-        {
-          name: "Returns",
-          path: "/dashboard/returns",
-          icon: <RotateCcw size={20} />,
-        },
       ],
     },
     {
@@ -74,11 +69,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           name: "Coupons",
           path: "/dashboard/coupons",
           icon: <TicketPercent size={20} />,
-        },
-        {
-          name: "Advertisements",
-          path: "/dashboard/advertisement",
-          icon: <ImagePlus size={20} />,
         },
       ],
     }, 

@@ -16,18 +16,32 @@ import {
   MapPin,
   Phone,
   FileText,
-  AlertCircle
+  AlertCircle,
+  Send,
+  MessageSquare,
+  Trash2,
+  Calendar
 } from "lucide-react";
 import { useLayoutContext } from "@/utils/useLayoutContext";
 import axios from "axios";
 import { envFile } from "@/config/env";
 import { IGetMyOrderedData } from "@/interfaces/cart.interface";
 import Image from "next/image";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import Link from "next/link";
+import { IGetAllReviews } from "@/interfaces/review.interface";
 
 const UserProfile = () => {
-  const [activeTab, setActiveTab] = useState<"settings" | "orders">("settings");
+  const [activeTab, setActiveTab] = useState<"settings" | "orders" | "review">("settings");
   const { user, setUser, cartLength } = useLayoutContext();
   const [myOrders, setMyOrders] = useState<IGetMyOrderedData[]>([]);
+  const [rating, setRating] = useState<number>(0);
+  const [feedback, setFeedback] = useState<string>("");
+  const [productId, setProductId] = useState<string>("");
+  const router = useRouter();
+  const [myReviews, setMyReviews] = useState<IGetAllReviews[]>([]);
 
   useEffect(() => {
     const fetchMyOrders = async () => {
@@ -44,6 +58,28 @@ const UserProfile = () => {
     };
     fetchMyOrders();
   }, []);
+
+  const fetchMyReview = async () => {
+    try {
+      const reviewsData = await axios.get(`${envFile.BACKEND_URL}/reviews/my-reviews`, {
+        withCredentials: true
+      });
+      if (reviewsData.data) {
+        const actualData = Array.isArray(reviewsData.data) 
+          ? reviewsData.data 
+          : reviewsData.data.data || [];
+        setMyReviews(actualData);
+      }
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchMyReview();
+    }
+  }, [user]);
 
   const [newName, setNewName] = useState(user?.name || "");
   const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
@@ -64,18 +100,147 @@ const UserProfile = () => {
     alert("Password updated successfully!");
   };
 
-  const handleLogout = () => {
-    alert("logout");
+  const handleLogout = async () => {
+    await authClient.signOut();
+    setUser(null);
+    router.push("/login");
   };
 
   const handleGiveReview = (productId: string) => {
-    alert(`Redirecting to review system for product ID: ${productId}`);
+    setProductId(productId);
+    const modal = document.getElementById("my_modal_3") as HTMLDialogElement;
+    modal.showModal();
+  };
+
+  const handleSubmitReview = async () => {
+    if (!productId) {
+      toast.error("No Product Found!");
+      return (document.getElementById("my_modal_3") as HTMLDialogElement)?.close();
+    }
+    const reviewData = {
+      rating: rating,
+      comment: feedback,
+      productId: productId
+    };
+
+    try {
+      const reviewPostResponse = await axios.post(`${envFile.BACKEND_URL}/reviews/create-review`, reviewData, {
+        withCredentials: true
+      });
+      if (reviewPostResponse.data.success) {
+        toast.success(reviewPostResponse.data.message);
+        setFeedback("");
+        setRating(0);
+        (document.getElementById("my_modal_3") as HTMLDialogElement)?.close();
+        fetchMyReview();
+      } else {
+        toast.error(reviewPostResponse.data.message);
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to submit review");
+    }
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
+    if (!window.confirm("Are you sure you want to delete this review permanently?")) return;
+
+    try {
+      const response = await axios.delete(`${envFile.BACKEND_URL}/reviews/delete/my-review/${reviewId}`, {
+        withCredentials: true
+      });
+      if(response.data.success){
+        setMyReviews((prev) => prev.filter((rev) => rev._id !== reviewId));
+        toast.success("Review deleted successfully!");
+      }else{
+        
+      }
+    } catch (error) {
+      console.error("Failed to delete review:", error);
+      toast.error("Could not remove the review. Try again.");
+    }
   };
 
   return (
     <div className="w-full max-w-7xl mx-auto p-4 md:p-6 space-y-6">
       
-      {/* ইউজার হেডার কার্ড */}
+      <dialog id="my_modal_3" className="modal backdrop-blur-xs">
+        <div className="modal-box bg-white max-w-md rounded-2xl border border-slate-100 p-6 shadow-xl space-y-5">
+          <form method="dialog">
+            <button className="btn btn-sm btn-circle btn-ghost text-slate-400 hover:text-slate-600 hover:bg-slate-100 absolute right-4 top-4 transition">
+              ✕
+            </button>
+          </form>
+
+          <div className="space-y-1">
+            <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+              <MessageSquare size={18} className="text-indigo-600" />
+              Write a Product Review
+            </h3>
+            <p className="text-xs text-slate-400">
+              Share your experience with this item to help other shoppers make informed choices.
+            </p>
+          </div>
+
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmitReview();
+            }} 
+            className="space-y-4"
+          >
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
+                Product Rating
+              </label>
+              <div className="rating rating-md flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((num) => (
+                  <input
+                    key={num}
+                    type="radio"
+                    name="rating-product"
+                    className="mask mask-star-2 bg-amber-400"
+                    value={num}
+                    checked={rating === num}
+                    onChange={() => setRating(num)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
+                Your Feedback
+              </label>
+              <textarea
+                required
+                rows={4}
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                placeholder="What did you like or dislike about this product? How is the quality..."
+                className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 font-medium resize-none transition"
+              />
+            </div>
+            
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => (document.getElementById("my_modal_3") as HTMLDialogElement)?.close()}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition"
+              >
+                <Send size={12} />
+                Submit Review
+              </button>
+            </div>
+          </form>
+        </div>
+      </dialog>
+
       <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row items-center gap-5">
         <div className="w-20 h-20 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center font-black text-2xl tracking-wider uppercase shadow-inner">
           {user?.name ? user.name.split(" ").map((n: string) => n[0]).join("") : "U"}
@@ -91,7 +256,6 @@ const UserProfile = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* সাইডবার নেভিগেশন */}
         <div className="lg:col-span-4 bg-white border border-slate-100 rounded-2xl p-4 shadow-xs space-y-2">
           <button
             type="button"
@@ -109,14 +273,23 @@ const UserProfile = () => {
             <span className="inline-flex items-center gap-2.5"><Package size={16} /> Order History</span>
             <span className="bg-slate-100 text-slate-700 text-xs font-bold font-mono px-2 py-0.5 rounded-full">{myOrders.length}</span>
           </button>
+          
+          <button
+            type="button"
+            onClick={() => setActiveTab("review")}
+            className={`w-full flex items-center justify-between p-3 text-sm font-semibold rounded-xl transition ${activeTab === "review" ? "bg-indigo-50 text-indigo-600" : "text-slate-600 hover:bg-slate-50"}`}
+          >
+            <span className="inline-flex items-center gap-2.5"><Star size={16} /> My Reviews</span>
+            <span className="bg-slate-100 text-slate-700 text-xs font-bold font-mono px-2 py-0.5 rounded-full">{myReviews.length}</span>
+          </button>
 
-          <a
+          <Link
             href="/cart"
             className="w-full flex items-center justify-between p-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 rounded-xl transition"
           >
             <span className="inline-flex items-center gap-2.5"><ShoppingBag size={16} /> View Shopping Cart</span>
             <span className="bg-indigo-600 text-white text-xs font-bold font-mono px-2 py-0.5 rounded-full">{cartLength}</span>
-          </a>
+          </Link>
 
           <div className="border-t border-slate-100 my-2 pt-2">
             <button
@@ -129,10 +302,7 @@ const UserProfile = () => {
           </div>
         </div>
 
-        {/* মেইন কন্টেন্ট এরিয়া */}
         <div className="lg:col-span-8 space-y-6">
-          
-          {/* ট্যাব: সেটিংস */}
           {activeTab === "settings" && (
             <>
               <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs space-y-4">
@@ -218,7 +388,6 @@ const UserProfile = () => {
             </>
           )}
 
-          {/* ট্যাব: অর্ডার হিস্ট্রি */}
           {activeTab === "orders" && (
             <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs space-y-4">
               <div>
@@ -244,7 +413,6 @@ const UserProfile = () => {
                         key={order._id} 
                         className="flex flex-col border border-slate-100 rounded-xl bg-white overflow-hidden hover:border-slate-200 transition shadow-xs"
                       >
-                        {/* অর্ডার কার্ড টপবার */}
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 bg-slate-50/60 border-b border-slate-100 w-full">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
@@ -277,10 +445,9 @@ const UserProfile = () => {
                           </div>
                         </div>
 
-                        {/* অর্ডারড প্রোডাক্ট লিস্ট (Orderitems) */}
                         <div className="p-4 border-b border-slate-50 grid grid-cols-1 md:grid-cols-2 gap-3">
                           {order.Orderitems?.map((item, idx) => (
-                            <div key={item.productId + idx} className="flex items-center justify-between gap-3 bg-slate-50/40 p-3 rounded-xl border border-slate-100">
+                            <div key={item.productId + idx} className="flex items-center justify-between gap-3 bg-slate-40/50 p-3 rounded-xl border border-slate-100">
                               <div className="flex items-center gap-3 min-w-0">
                                 <div className="w-12 h-12 bg-white border border-slate-100 rounded-lg overflow-hidden shrink-0 flex items-center justify-center relative p-1">
                                   <Image 
@@ -315,7 +482,6 @@ const UserProfile = () => {
                           ))}
                         </div>
 
-                        {/* কাস্টমার ডেলিভারি ও প্রাইস সামারি */}
                         <div className="p-4 bg-slate-50/20 text-xs text-slate-600 space-y-2">
                           <div className="flex items-start gap-2">
                             <MapPin size={14} className="text-slate-400 mt-0.5 shrink-0" />
@@ -336,13 +502,77 @@ const UserProfile = () => {
                             </div>
                           )}
 
-                          {/* সাবটোটাল ও ডেলিভারি চার্জ বার */}
                           <div className="flex justify-between items-center border-t border-slate-100 pt-2 text-[11px] text-slate-400 font-mono font-medium">
                             <span>Subtotal: ${order.totalPrice.toFixed(2)}</span>
                             <span>Delivery: ${order.deliveryCharge.toFixed(2)}</span>
                           </div>
                         </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
+          {activeTab === "review" && (
+            <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs space-y-4">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 tracking-tight">My Testimonials</h3>
+                <p className="text-xs text-slate-400">Manage and preview all product appraisals submitted by you</p>
+              </div>
+
+              {myReviews.length === 0 ? (
+                <div className="text-center py-12 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl text-slate-400 text-xs font-medium">
+                  No review tokens registered in your timeline ledger.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {myReviews.map((rev) => {
+                    const reviewDate = rev.createdAt 
+                      ? new Date(rev.createdAt).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })
+                      : "Recent";
+
+                    return (
+                      <div 
+                        key={rev._id} 
+                        className="bg-white border border-slate-100 rounded-xl p-4 shadow-2xs hover:border-slate-200 transition flex flex-col justify-between group relative"
+                      >
+                        <div className="space-y-2.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-0.5">
+                              {Array.from({ length: 5 }).map((_, starIdx) => (
+                                <Star
+                                  key={starIdx}
+                                  size={13}
+                                  className={`${
+                                    starIdx < rev.rating 
+                                      ? "text-amber-400 fill-amber-400" 
+                                      : "text-slate-200"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteReview(rev._id)}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg border border-slate-100 hover:border-rose-100 transition sm:opacity-0 group-hover:opacity-100"
+                              title="Delete review"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+
+                          <p className="text-xs text-slate-600 leading-relaxed font-medium pl-1 border-l-2 border-indigo-500/20">
+                            "{rev.comment}"
+                          </p>
+                        </div>
+
+                        <div className="mt-4 pt-2 border-t border-slate-50 flex items-center justify-between text-[10px] text-slate-400 font-mono font-semibold">
+                          <span className="inline-flex items-center gap-1"><Calendar size={11} /> {reviewDate}</span>
+                          <Link href={`/products/${rev.productId}`} >PID: #{rev.productId?.slice(-5).toUpperCase() || "N/A"}</Link>
+                        </div>
                       </div>
                     );
                   })}

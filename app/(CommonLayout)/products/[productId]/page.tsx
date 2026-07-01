@@ -101,6 +101,9 @@ const DynamicProductDetailsPage = () => {
             router.push("/login");
             return;
         }
+        if(user.role === "ADMIN"){
+            return toast.error("As owner you can't order");
+        }
         if(!selectedSize || !selectedColor){
             toast.error("Please select a size and color")
             return
